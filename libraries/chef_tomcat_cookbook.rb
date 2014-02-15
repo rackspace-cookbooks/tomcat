@@ -1,10 +1,12 @@
 #
-# Cookbook Name:: tomcat
+# Cookbook Name:: rackspace_tomcat
 # Library:: chef_tomcat_cookbook
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
+# Author:: Christopher Coffey (<christopher.coffey@rackspace.com>)
 #
 # Copyright 2010-2012, Opscode, Inc.
+# Copyright 2014, Rackspace, US Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

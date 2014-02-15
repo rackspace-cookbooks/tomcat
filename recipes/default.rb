@@ -1,8 +1,9 @@
 #
-# Cookbook Name:: tomcat
+# Cookbook Name:: rackspace_tomcat
 # Recipe:: default
 #
 # Copyright 2010, Opscode, Inc.
+# Copyright 2014, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,17 +21,14 @@
 # required for the secure_password method from the openssl cookbook
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-include_recipe "java"
+include_recipe "rackspace_java"
 
 tomcat_pkgs = value_for_platform(
   ["debian","ubuntu"] => {
     "default" => ["tomcat#{node["tomcat"]["base_version"]}","tomcat#{node["tomcat"]["base_version"]}-admin"]
   },
-  ["centos","redhat","fedora","amazon"] => {
+  ["centos","redhat"] => {
     "default" => ["tomcat#{node["tomcat"]["base_version"]}","tomcat#{node["tomcat"]["base_version"]}-admin-webapps"]
-  },
-  ["smartos"] => {
-    "default" => ["apache-tomcat"]
   },
   "default" => ["tomcat#{node["tomcat"]["base_version"]}"]
 )
@@ -61,22 +59,6 @@ unless node['tomcat']['deploy_manager_apps']
   end
   file "#{node['tomcat']['config_dir']}/Catalina/localhost/host-manager.xml" do
     action :delete
-  end
-end
-
-case node["platform"]
-when "smartos"
-  template "/opt/local/share/smf/apache-tomcat/manifest.xml" do
-    source "manifest.xml.erb"
-    owner "root"
-    group "root"
-    mode "0644"
-    notifies :run, "execute[tomcat_manifest]"
-  end
-  execute "tomcat_manifest" do
-    command "svccfg import /opt/local/share/smf/apache-tomcat/manifest.xml"
-    action :nothing
-    notifies :restart, "service[tomcat]"
   end
 end
 
@@ -111,7 +93,7 @@ unless node['tomcat']["truststore_file"].nil?
 end
 
 case node["platform"]
-when "centos","redhat","fedora","amazon"
+when "centos","redhat"
   template "/etc/sysconfig/tomcat#{node["tomcat"]["base_version"]}" do
     source "sysconfig_tomcat6.erb"
     owner "root"
@@ -119,7 +101,6 @@ when "centos","redhat","fedora","amazon"
     mode "0644"
     notifies :restart, "service[tomcat]"
   end
-when "smartos"
 else
   template "/etc/default/tomcat#{node["tomcat"]["base_version"]}" do
     source "default_tomcat6.erb"
