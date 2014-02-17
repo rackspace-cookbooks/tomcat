@@ -40,8 +40,8 @@ default['rackspace_tomcat']['certificate_dn'] = 'cn=localhost'
 default['rackspace_tomcat']['loglevel'] = 'INFO'
 default['rackspace_tomcat']['tomcat_auth'] = 'true'
 
-case node['platform']
-when 'centos','redhat'
+case node['platform_family']
+when 'rhel'
   default['rackspace_tomcat']['user'] = 'tomcat'
   default['rackspace_tomcat']['group'] = 'tomcat'
   default['rackspace_tomcat']['home'] = "/usr/share/tomcat#{node['rackspace_tomcat']['base_version']}"
@@ -55,7 +55,7 @@ when 'centos','redhat'
   default['rackspace_tomcat']['keytool'] = '/usr/lib/jvm/java/bin/keytool'
   default['rackspace_tomcat']['lib_dir'] = "#{node['rackspace_tomcat']['home']}/lib"
   default['rackspace_tomcat']['endorsed_dir'] = "#{node['rackspace_tomcat']['lib_dir']}/endorsed"
-when 'debian','ubuntu'
+when 'debian'
   default['rackspace_tomcat']['user'] = "tomcat#{node['rackspace_tomcat']['base_version']}"
   default['rackspace_tomcat']['group'] = "tomcat#{node['rackspace_tomcat']['base_version']}"
   default['rackspace_tomcat']['home'] = "/usr/share/tomcat#{node['rackspace_tomcat']['base_version']}"
