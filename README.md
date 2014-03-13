@@ -8,6 +8,7 @@ Requirements
 ### Platforms
 - Debian, Ubuntu 
 - CentOS 6+, Red Hat 6+
+
 ### Dependencies
 - rackspace_java
 - openssl

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: tomcat
+# Cookbook Name:: rackspace_tomcat
 # Recipe:: users
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
