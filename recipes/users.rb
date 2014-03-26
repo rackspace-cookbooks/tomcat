@@ -25,8 +25,8 @@ template "#{node['rackspace_tomcat']['config_dir']}/tomcat-users.xml" do
   group 'root'
   mode '0644'
   variables(
-    :users => TomcatCookbook.users,
-    :roles => TomcatCookbook.roles
+    users: TomcatCookbook.users,
+    roles: TomcatCookbook.roles
   )
   notifies :restart, 'service[tomcat]'
 end

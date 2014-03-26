@@ -21,6 +21,7 @@
 # limitations under the License.
 #
 
+# rubocop:disable all
 class Chef
   module TomcatCookbook
     class TomcatCookbookError < StandardError; end
@@ -43,7 +44,7 @@ class Chef
       end
     end
 
-    USERS_DATA_BAG = "tomcat_users"
+    USERS_DATA_BAG = 'tomcat_users'
 
     class << self
       # Returns a array of data bag items for the users in the Tomcat Users
@@ -111,3 +112,4 @@ class Chef
     end
   end
 end
+# rubocop:enable all

@@ -6,10 +6,5 @@ description      'Installs/Configures tomcat'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '1.0.0'
 
-%w{ java openssl }.each do |cb|
-  depends cb
-end
-
-%w{ debian ubuntu centos redhat }.each do |os|
-  supports os
-end
+depends 'java'
+depends 'openssl'
