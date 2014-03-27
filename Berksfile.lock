@@ -1,0 +1,13 @@
+{
+  "sources": {
+    "rackspace_tomcat": {
+      "path": "."
+    },
+    "java": {
+      "locked_version": "1.19.2"
+    },
+    "openssl": {
+      "locked_version": "1.1.0"
+    }
+  }
+}

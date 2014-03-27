@@ -3,8 +3,10 @@
 # Recipe:: users
 #
 # Author:: Jamie Winsor (<jamie@vialstudios.com>)
+# Author:: Christopher Coffey (<christopher.coffey@rackspace.com>)
 #
 # Copyright 2010-2012, Opscode, Inc.
+# Copyright 2014, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +22,7 @@
 #
 
 template "#{node['rackspace_tomcat']['config_dir']}/tomcat-users.xml" do
+  cookbook node['rackspace_tomcat']['templates_cookbook']['tomcat_users']
   source 'tomcat-users.xml.erb'
   owner 'root'
   group 'root'

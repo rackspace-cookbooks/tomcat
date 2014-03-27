@@ -24,23 +24,29 @@
 include_recipe 'java'
 
 tomcat_pkgs = value_for_platform(
-  ['debian','ubuntu'] => {
-    'default' => ["tomcat#{node['rackspace_tomcat']['base_version']}","tomcat#{node['rackspace_tomcat']['base_version']}-admin"]
-  },
-  ['centos','redhat'] => {
-    'default' => ["tomcat#{node['rackspace_tomcat']['base_version']}","tomcat#{node['rackspace_tomcat']['base_version']}-admin-webapps"]
-  },
-  'default' => ["tomcat#{node['rackspace_tomcat']['base_version']}","tomcat#{node['rackspace_tomcat']['base_version']}-admin"]
-)
+  'default' => ["tomcat#{node['rackspace_tomcat']['base_version']}"],
+  )
+if node['rackspace_tomcat']['deploy_manager_apps']
+  tomcat_pkgs << value_for_platform(
+    %w{ debian ubuntu } => {
+      'default' => "tomcat#{node['rackspace_tomcat']['base_version']}-admin",
+    },
+    %w{ centos redhat } => {
+      'default' => "tomcat#{node['rackspace_tomcat']['base_version']}-admin-webapps",
+    },
+    )
+end
+
+tomcat_pkgs.compact!
 
 tomcat_pkgs.each do |pkg|
   package pkg do
     action :install
-    version node['rackspace_tomcat']['base_version']
+  end
 end
 
 directory node['rackspace_tomcat']['endorsed_dir'] do
-  mode "0755"
+  mode '0755'
   recursive true
 end
 
@@ -61,18 +67,24 @@ unless node['rackspace_tomcat']['deploy_manager_apps']
   end
 end
 
-service "tomcat" do
-  case node["platform_family"]
+service 'tomcat' do
+  case node['platform_family']
   when 'rhel'
     service_name "tomcat#{node['rackspace_tomcat']['base_version']}"
-    supports :restart => true, :status => true
+    supports restart: true, status: true
   when 'debian'
     service_name "tomcat#{node['rackspace_tomcat']['base_version']}"
-    supports :restart => true, :reload => false, :status => true
+    supports restart: true, reload: false, status: true
   end
   action [:enable, :start]
+  notifies :run, 'execute[wait for tomcat]', :immediately
   retries 4
   retry_delay 30
+end
+
+execute 'wait for tomcat' do
+  command 'sleep 5'
+  action :nothing
 end
 
 node.set_unless['rackspace_tomcat']['keystore_password'] = secure_password
@@ -89,6 +101,7 @@ end
 case node['platform_family']
 when 'rhel'
   template "/etc/sysconfig/tomcat#{node['rackspace_tomcat']['base_version']}" do
+    cookbook node['rackspace_tomcat']['templates_cookbook']['sysconfig_tomcat6']
     source 'sysconfig_tomcat6.erb'
     owner 'root'
     group 'root'
@@ -97,6 +110,7 @@ when 'rhel'
   end
 when 'debian'
   template "/etc/default/tomcat#{node['rackspace_tomcat']['base_version']}" do
+    cookbook node['rackspace_tomcat']['templates_cookbook']['default_tomcat6']
     source 'default_tomcat6.erb'
     owner 'root'
     group 'root'
@@ -106,6 +120,7 @@ when 'debian'
 end
 
 template "#{node['rackspace_tomcat']['config_dir']}/server.xml" do
+  cookbook node['rackspace_tomcat']['templates_cookbook']['server_xml']
   source 'server.xml.erb'
   owner 'root'
   group 'root'
@@ -114,6 +129,7 @@ template "#{node['rackspace_tomcat']['config_dir']}/server.xml" do
 end
 
 template "#{node['rackspace_tomcat']['config_dir']}/logging.properties" do
+  cookbook node['rackspace_tomcat']['templates_cookbook']['logging_properties']
   source 'logging.properties.erb'
   owner 'root'
   group 'root'
@@ -121,7 +137,16 @@ template "#{node['rackspace_tomcat']['config_dir']}/logging.properties" do
   notifies :restart, 'service[tomcat]'
 end
 
-unless node['rackspace_tomcat']['ssl_cert_file'].nil?
+if node['rackspace_tomcat']['ssl_cert_file'].nil?
+  execute 'Create Tomcat SSL certificate' do
+    group node['rackspace_tomcat']['group']
+    command "#{node['rackspace_tomcat']['keytool']} -genkeypair -keystore \"#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['keystore_file']}\" -storepass \"#{node['rackspace_tomcat']['keystore_password']}\" -keypass \"#{node['rackspace_tomcat']['keystore_password']}\" -dname \"#{node['rackspace_tomcat']['certificate_dn']}\""
+    umask 0007
+    creates "#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['keystore_file']}"
+    action :run
+    notifies :restart, 'service[tomcat]'
+  end
+else
   script 'create_tomcat_keystore' do
     interpreter 'bash'
     action :nothing
@@ -129,42 +154,36 @@ unless node['rackspace_tomcat']['ssl_cert_file'].nil?
     code <<-EOH
       cat #{node['rackspace_tomcat']['ssl_chain_files'].join(' ')} > cacerts.pem
       openssl pkcs12 -export \
-       -inkey #{node['rackspace_tomcat']['ssl_key_file']} \
-       -in #{node['rackspace_tomcat']['ssl_cert_file']} \
-       -chain \
-       -CAfile cacerts.pem \
-       -password pass:#{node['rackspace_tomcat']['keystore_password']} \
-       -out #{node['rackspace_tomcat']['keystore_file']}
+      -inkey #{node['rackspace_tomcat']['ssl_key_file']} \
+      -in #{node['rackspace_tomcat']['ssl_cert_file']} \
+      -chain \
+      -CAfile cacerts.pem \
+      -password pass:#{node['rackspace_tomcat']['keystore_password']} \
+      -out #{node['rackspace_tomcat']['keystore_file']}
     EOH
     notifies :restart, 'service[tomcat]'
   end
+
   cookbook_file "#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['ssl_cert_file']}" do
     mode '0644'
     notifies :run, 'script[create_tomcat_keystore]'
   end
+
   cookbook_file "#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['ssl_key_file']}" do
     mode '0644'
     notifies :run, 'script[create_tomcat_keystore]'
   end
+
   node['rackspace_tomcat']['ssl_chain_files'].each do |cert|
     cookbook_file "#{node['rackspace_tomcat']['config_dir']}/#{cert}" do
       mode '0644'
       notifies :run, 'script[create_tomcat_keystore]'
     end
   end
-else
-  execute 'Create Tomcat SSL certificate' do
-    group node['rackspace_tomcat']['group']
-    command "#{node['rackspace_tomcat']['keytool']} -genkeypair -keystore \"#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['keystore_file']}\" -storepass \"#{node['rackspace_tomcat']['keystore_password']}\" -keypass \"#{node['rackspace_tomcat']['keystore_password']}\" -dname \"#{node['rackspace_tomcat']['certificate_dn']}\""
-    umask 0007
-    creates "#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['keystore_file']}"
-    action :run
-    notifies :restart, "service[tomcat]"
-  end
 end
 
 unless node['rackspace_tomcat']['truststore_file'].nil?
   cookbook_file "#{node['rackspace_tomcat']['config_dir']}/#{node['rackspace_tomcat']['truststore_file']}" do
-    mode "0644"
+    mode '0644'
   end
 end

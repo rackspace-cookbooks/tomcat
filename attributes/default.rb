@@ -40,6 +40,12 @@ default['rackspace_tomcat']['certificate_dn'] = 'cn=localhost'
 default['rackspace_tomcat']['loglevel'] = 'INFO'
 default['rackspace_tomcat']['tomcat_auth'] = 'true'
 
+default['rackspace_tomcat']['templates_cookbook']['sysconfig_tomcat6'] = 'rackspace_tomcat'
+default['rackspace_tomcat']['templates_cookbook']['default_tomcat6'] = 'rackspace_tomcat'
+default['rackspace_tomcat']['templates_cookbook']['server_xml'] = 'rackspace_tomcat'
+default['rackspace_tomcat']['templates_cookbook']['logging_properties'] = 'rackspace_tomcat'
+default['rackspace_tomcat']['templates_cookbook']['tomcat_users'] = 'rackspace_tomcat'
+
 case node['platform_family']
 when 'rhel'
   default['rackspace_tomcat']['user'] = 'tomcat'
@@ -52,7 +58,7 @@ when 'rhel'
   default['rackspace_tomcat']['work_dir'] = "/var/cache/tomcat#{node['rackspace_tomcat']['base_version']}/work"
   default['rackspace_tomcat']['context_dir'] = "#{node['rackspace_tomcat']['config_dir']}/Catalina/localhost"
   default['rackspace_tomcat']['webapp_dir'] = "/var/lib/tomcat#{node['rackspace_tomcat']['base_version']}/webapps"
-  default['rackspace_tomcat']['keytool'] = '/usr/lib/jvm/java/bin/keytool'
+  default['rackspace_tomcat']['keytool'] = 'keytool'
   default['rackspace_tomcat']['lib_dir'] = "#{node['rackspace_tomcat']['home']}/lib"
   default['rackspace_tomcat']['endorsed_dir'] = "#{node['rackspace_tomcat']['lib_dir']}/endorsed"
 when 'debian'
@@ -66,7 +72,7 @@ when 'debian'
   default['rackspace_tomcat']['work_dir'] = "/var/cache/tomcat#{node['rackspace_tomcat']['base_version']}"
   default['rackspace_tomcat']['context_dir'] = "#{node['rackspace_tomcat']['config_dir']}/Catalina/localhost"
   default['rackspace_tomcat']['webapp_dir'] = "/var/lib/tomcat#{node['rackspace_tomcat']['base_version']}/webapps"
-  default['rackspace_tomcat']['keytool'] = '/usr/lib/jvm/default-java/bin/keytool'
+  default['rackspace_tomcat']['keytool'] = 'keytool'
   default['rackspace_tomcat']['lib_dir'] = "#{node['rackspace_tomcat']['home']}/lib"
   default['rackspace_tomcat']['endorsed_dir'] = "#{node['rackspace_tomcat']['lib_dir']}/endorsed"
 end
