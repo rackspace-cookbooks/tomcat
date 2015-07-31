@@ -170,6 +170,7 @@ action :configure do
 
   template "#{new_resource.config_dir}/server.xml" do
     source 'server.xml.erb'
+    source new_resource.server_xml_source if new_resource.server_xml_source
     cookbook new_resource.server_xml_cookbook if new_resource.server_xml_cookbook
       variables ({
         :port => new_resource.port,

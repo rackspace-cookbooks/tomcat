@@ -51,6 +51,7 @@ default['tomcat']['run_base_instance'] = true
 default['tomcat']['packages'] = ["tomcat#{node['tomcat']['base_version']}"]
 default['tomcat']['deploy_manager_packages'] = ["tomcat#{node['tomcat']['base_version']}-admin"]
 default['tomcat']['server_xml_cookbook'] = 'tomcat'
+default['tomcat']['server_xml_source'] = 'server.xml.erb'
 
 case node['platform_family']
 

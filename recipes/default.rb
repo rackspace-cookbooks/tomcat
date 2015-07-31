@@ -68,6 +68,7 @@ if node['tomcat']['run_base_instance']
     ajp_port node['tomcat']['ajp_port']
     shutdown_port node['tomcat']['shutdown_port']
     server_xml_cookbook node['tomcat']['server_xml_cookbook']
+    server_xml_source node['tomcat']['server_xml_source']
   end
 end
 
@@ -108,5 +109,6 @@ node['tomcat']['instances'].each do |name, attrs|
     lib_dir attrs['lib_dir']
     endorsed_dir attrs['endorsed_dir']
     server_xml_cookbook attrs['server_xml_cookbook']
+    server_xml_source attrs['server_xml_source']
   end
 end

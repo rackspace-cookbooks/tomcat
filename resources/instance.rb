@@ -24,6 +24,8 @@ attribute :shutdown_port,
 # The rest will inherit from node attributes
 attribute :server_xml_cookbook,
   :kind_of => String
+attribute :server_xml_source,
+  :kind_of => String
 attribute :config_dir,
   :kind_of => String
 attribute :log_dir,
